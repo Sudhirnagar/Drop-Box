@@ -3,7 +3,7 @@ let nodes = [];
 let files = {};
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeDropZone();
     loadConfiguration();
     log('System initialized', 'info');
@@ -44,7 +44,7 @@ function initializeDropZone() {
         e.preventDefault();
         e.stopPropagation();
         dropZone.classList.remove('drag-over');
-        
+
         const droppedFiles = e.dataTransfer.files;
         handleFiles(droppedFiles);
     });
@@ -56,7 +56,7 @@ function initializeDropZone() {
 
 async function handleFiles(fileList) {
     if (fileList.length === 0) return;
-    
+
     if (nodes.length === 0) {
         alert('Please add at least one storage node before uploading files.');
         log('Upload failed: No nodes configured', 'error');
@@ -80,7 +80,7 @@ async function uploadFile(file) {
     try {
         // Read file
         const fileData = await readFileAsArrayBuffer(file);
-        
+
         // Partition into chunks
         const chunks = partitionFile(fileData, chunkSize);
         log(`File split into ${chunks.length} chunks`, 'info');
@@ -97,7 +97,7 @@ async function uploadFile(file) {
         // Upload each chunk with replication
         for (let i = 0; i < chunks.length; i++) {
             updateProgress((i / chunks.length) * 100, `Uploading chunk ${i + 1}/${chunks.length}`);
-            
+
             const chunk = chunks[i];
             const numReplicas = Math.min(replicationFactor, nodes.length);
             const targetNodes = [];
@@ -114,7 +114,7 @@ async function uploadFile(file) {
 
         updateProgress(100, 'Upload complete!');
         log(`✓ Upload complete: ${file.name}`, 'success');
-        
+
         setTimeout(() => {
             showProgress(false);
             refreshFilesList();
@@ -138,7 +138,7 @@ function readFileAsArrayBuffer(file) {
 function partitionFile(arrayBuffer, chunkSize) {
     const chunks = [];
     const view = new Uint8Array(arrayBuffer);
-    
+
     for (let i = 0; i < view.length; i += chunkSize) {
         const chunk = view.slice(i, i + chunkSize);
         const hash = simpleHash(chunk);
@@ -148,7 +148,7 @@ function partitionFile(arrayBuffer, chunkSize) {
             hash: hash
         });
     }
-    
+
     return chunks;
 }
 
@@ -172,7 +172,7 @@ function downloadFile(filename) {
     }
 
     log(`Downloading: ${filename}`, 'info');
-    
+
     // Simulate download (in real implementation, this would retrieve chunks from nodes)
     setTimeout(() => {
         log(`✓ Download complete: ${filename}`, 'success');
@@ -191,10 +191,10 @@ function deleteFile(filename) {
     }
 
     log(`Deleting: ${filename}`, 'info');
-    
+
     // Delete from storage
     delete files[filename];
-    
+
     log(`✓ File deleted: ${filename}`, 'success');
     refreshFilesList();
 }
@@ -245,16 +245,19 @@ function removeNode(nodeId) {
 
     nodes = nodes.filter(n => n.id !== nodeId);
     log(`Removed node ${nodeId}`, 'info');
-    
+
     renderNodes();
     saveConfiguration();
 }
 
 function renderNodes() {
     const nodesList = document.getElementById('nodesList');
-    
+
     if (nodes.length === 0) {
-        nodesList.innerHTML = '<div class="empty-state">No nodes configured. Add nodes to get started.</div>';
+        nodesList.innerHTML = `
+  <div class="empty-state notice">
+    ⚠️ No nodes configured. Add nodes to get started.<br>
+    <span>To configure nodes, please check the <b>config.json</b> file.</span></div>`;
         return;
     }
 
@@ -322,7 +325,7 @@ function showProgress(show) {
 function updateProgress(percent, text) {
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
-    
+
     progressFill.style.width = percent + '%';
     progressFill.textContent = Math.round(percent) + '%';
     progressText.textContent = text;
@@ -338,9 +341,9 @@ function log(message, type = 'info') {
     const logEntry = document.createElement('div');
     logEntry.className = `log-entry ${type}`;
     logEntry.textContent = `[${timestamp}] ${message}`;
-    
+
     logsDiv.insertBefore(logEntry, logsDiv.firstChild);
-    
+
     // Keep only last 50 logs
     while (logsDiv.children.length > 50) {
         logsDiv.removeChild(logsDiv.lastChild);
@@ -375,7 +378,7 @@ function loadConfiguration() {
             document.getElementById('chunkSize').value = config.chunkSize || 1048576;
             nodes = config.nodes || [];
             files = config.files || {};
-            
+
             renderNodes();
             refreshFilesList();
             log('Configuration loaded', 'success');

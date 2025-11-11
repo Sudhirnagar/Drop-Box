@@ -503,3 +503,23 @@ body {
         align-items: flex-start;
     }
 }
+
+
+.notice {
+  background-color: #fff3cd;   /* light yellow background */
+  color: #856404;              /* dark golden text */
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 20px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
